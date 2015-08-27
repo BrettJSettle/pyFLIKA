@@ -36,12 +36,11 @@ settings = \
 "RotatedFit=true                        Set this to true to fit to 2d rotating gaussian. (default: true)\n"\
 "maxSigmaForGaussianFit=20              During gaussian fit, sigma can't exceed this number. (default: 20)"
 
-win = QMainWindow()
+win = DockWindow(addMenu=False)
 win.resize(1400, 800)
-dv = DockView(win, menu=False)
 traceWidget = PlotWidget(name='Average Trace')
 averageLine = pg.PlotDataItem()
-traceWidget.add(averageLine, name='Average Line')
+traceWidget.addItem(averageLine, name='Average Line')
 puffTraceWidget = PlotWidget(name='Puff Trace')
 imageWidget = VideoWidget(name='Video Dock', view=ROIViewBox(roiMenu=True))
 opsWidget = QWidget()
@@ -72,7 +71,7 @@ def ready():
 	K['image'] = K['image'][K['crop_frames'][0]:K['crop_frames'][1]]
 	remove_flash()
 	subtract_blacklevel()
-	dv.moveDock(puffDock, 'above', opsDock)
+	win.moveDock(puffDock, 'above', opsDock)
 	beginAction.setEnabled(True)
 
 def remove_flash():
@@ -155,7 +154,7 @@ def plotLine(name, **data):
 		if line.__name__ == name:
 			line.setData(**data)
 			return
-	traceWidget.add(pg.PlotDataItem(**data), name=name)
+	traceWidget.addItem(pg.PlotDataItem(**data), name=name, export=False)
 
 def getPuffIndices(x, y, frame=-1):
 	'''
@@ -174,18 +173,18 @@ def getPuffIndices(x, y, frame=-1):
 
 def plotPuff(puff):
 	puffTraceWidget.clear()
-	puffTraceWidget.add(pg.PlotDataItem(x=puff.x_full, y=puff.f_full, pen=pg.mkPen('w')), name='full')
-	puffTraceWidget.add(pg.PlotDataItem(x=puff.x_full, y=puff.weak_full, pen=pg.mkPen('r')), name='weak')
-	puffTraceWidget.add(pg.PlotDataItem(x=puff.x_full, y=puff.strong_full, pen=pg.mkPen('g')), name='strong')
+	puffTraceWidget.addItem(pg.PlotDataItem(x=puff.x_full, y=puff.f_full, pen=pg.mkPen('w')), name='full')
+	puffTraceWidget.addItem(pg.PlotDataItem(x=puff.x_full, y=puff.weak_full, pen=pg.mkPen('r')), name='weak')
+	puffTraceWidget.addItem(pg.PlotDataItem(x=puff.x_full, y=puff.strong_full, pen=pg.mkPen('g')), name='strong')
 
-	puffTraceWidget.addItem(pg.InfiniteLine(pos=puff.baseline, angle=0, pen = .3))
-	puffTraceWidget.addItem(pg.InfiniteLine(pos=puff.thresh20, angle=0, pen = .3))
-	puffTraceWidget.addItem(pg.InfiniteLine(pos=puff.thresh50, angle=0, pen = .3))
-	puffTraceWidget.addItem(pg.InfiniteLine(pos=puff.thresh80, angle=0, pen = .3))
-	puffTraceWidget.addItem(pg.InfiniteLine(pos=puff.baseline+puff.amplitude, angle=0, pen =.3))
-	puffTraceWidget.addItem(pg.ScatterPlotItem(pos = [(puff.t_start, puff.baseline)], symbol='o', symbolSize=10, pen=1))
-	puffTraceWidget.addItem(pg.ScatterPlotItem(pos = [(puff.t_end, puff.weak_full[puff.t_end])], symbol='o', symbolSize=10, pen=1))
-	puffTraceWidget.addItem(pg.ScatterPlotItem(pos = [(puff.t_peak, puff.baseline+puff.amplitude)], symbol='o', symbolSize=10, pen=1))
+	puffTraceWidget.addItem(pg.InfiniteLine(pos=puff.baseline, angle=0, pen = .3), export=False)
+	puffTraceWidget.addItem(pg.InfiniteLine(pos=puff.thresh20, angle=0, pen = .3), export=False)
+	puffTraceWidget.addItem(pg.InfiniteLine(pos=puff.thresh50, angle=0, pen = .3), export=False)
+	puffTraceWidget.addItem(pg.InfiniteLine(pos=puff.thresh80, angle=0, pen = .3), export=False)
+	puffTraceWidget.addItem(pg.InfiniteLine(pos=puff.baseline+puff.amplitude, angle=0, pen =.3), export=False)
+	puffTraceWidget.addItem(pg.ScatterPlotItem(pos = [(puff.t_start, puff.baseline)], symbol='o', symbolSize=10, pen=1), export=False)
+	puffTraceWidget.addItem(pg.ScatterPlotItem(pos = [(puff.t_end, puff.weak_full[puff.t_end])], symbol='o', symbolSize=10, pen=1), export=False)
+	puffTraceWidget.addItem(pg.ScatterPlotItem(pos = [(puff.t_peak, puff.baseline+puff.amplitude)], symbol='o', symbolSize=10, pen=1), export=False)
 
 	puffTraceWidget.setXRange(puff.xdata[0], puff.xdata[-1])
 
@@ -195,7 +194,7 @@ def plot_puffs_on_image(): # points are plotted as (y, x)
 	data = {'x': x, 'y': y, 'size': 2, 'pen': QPen(Qt.yellow), \
 		'name': 'Puff Group', 'pxMode': False, 'symbol': 's'}
 	if not hasattr(imageWidget, 'puffScatter'):
-		imageWidget.puffScatter = imageWidget.add(pg.ScatterPlotItem(**data), name='puffScatter')
+		imageWidget.puffScatter = imageWidget.addItem(pg.ScatterPlotItem(**data), name='puffScatter')
 	else:
 		imageWidget.puffScatter.setData(**data)
 
@@ -348,7 +347,7 @@ def load_plots():
 	K['puffGroups'] = groupPuffs(K['puffs'])
 	mt, my, mx = np.shape(K['image'])
 	imageWidget.location = PixelSelector(max_bounds = [my+1, mx+1]) # Image is transposed for user
-	imageWidget.add(imageWidget.location, name='Mouse Position')
+	imageWidget.addItem(imageWidget.location, name='Mouse Position')
 	imageWidget.view.mousePressEvent = imageClick
 	imageWidget.view.mouseDragEvent = imageDrag
 	imageWidget.location.removeHandle(0)
@@ -361,10 +360,10 @@ def load_plots():
 		{'key': 'button', 'name': 'Restart', 'action': reset},\
 		{'key': 'groupRadius', 'name': 'Group Radius', 'value': 1}])
 	buttonWidget.valueChanged.connect(update_view)
-	dv.addWidget(buttonWidget, name='Buttons', where=('bottom', imageDock), size=(9, 1))
+	win.addWidget(buttonWidget, name='Buttons', where=('bottom', imageDock), size=(9, 1))
 
 	traceWidget.mouseLine = pg.InfiniteLine(0, pen=QPen(Qt.blue), bounds = (0, len(K['image'])))
-	traceWidget.add(traceWidget.mouseLine, name='Frame Position')
+	traceWidget.addItem(traceWidget.mouseLine, name='Frame Position', export=False)
 	traceWidget.mouseLine.sigPositionChanged.connect(mouseLine_moved)
 	traceWidget.getViewBox().mousePressEvent = traceClick
 	traceWidget.getViewBox().mouseDragEvent = traceDrag
@@ -395,9 +394,9 @@ def reset():
 	traceWidget.getViewBox().clear()
 	imageWidget.view.clear()
 	traceWidget.scene().sigMouseMoved.connect(traceMouseMoved)
-	traceWidget.add(averageLine, name='Average Trace')
+	traceWidget.addItem(averageLine, name='Average Trace')
 	imageWidget.open_image()
-	dv.moveDock(opsDock, 'above', puffDock)
+	win.moveDock(opsDock, 'above', puffDock)
 
 def start_flika():
 	global K, currentThread
@@ -525,24 +524,21 @@ traceWidget.scene().sigMouseMoved.connect(traceMouseMoved)
 imageWidget.scene.sigMouseMoved.connect(imageMouseMoved)
 traceWidget.load_file = imageWidget.open_image
 
-fileMenu = QMenu('&File', win)
-fileMenu.addAction(QAction('&Open Image', fileMenu, triggered = imageWidget.open_image))
+fileMenu = win.menuBar().addMenu('&File')
+fileMenu.addAction(QAction('&Open Image', fileMenu, triggered = lambda : imageWidget.open_image()))
 fileMenu.addAction(QAction('&Close', fileMenu, triggered = win.close))
 fileMenu.addAction(QAction('&Reset', fileMenu, triggered = reset))
-win.menuBar().addMenu(fileMenu)
-analyzeMenu = QMenu("&FLIKA", win)
+analyzeMenu = win.menuBar().addMenu("&FLIKA")
 beginAction = QAction('&Analyze', analyzeMenu, triggered = start_flika)
 analyzeMenu.addAction(beginAction)
-win.menuBar().addMenu(analyzeMenu)
-exportMenu = QMenu('&Export')
+exportMenu = win.menuBar().addMenu('&Export')
 exportMenu.addAction(QAction('&Save Data', exportMenu, triggered=saveData))
 beginAction.setEnabled(False)
-win.menuBar().addMenu(exportMenu)
-traceDock = dv.addWidget(traceWidget, name="Full Trace", size=(5, 4))
-puffDock = dv.addWidget(puffTraceWidget, name='Puff Trace', size=(3, 1), where=('bottom', traceDock))
+traceDock = win.addWidget(traceWidget, name="Full Trace", size=(5, 4))
+puffDock = win.addWidget(puffTraceWidget, name='Puff Trace', size=(3, 1), where=('bottom', traceDock))
 make_opts()
-opsDock = dv.addWidget(opsWidget, name='Analysis Options', size=(2, 1), where=('above', puffDock))
-imageDock = dv.addWidget(imageWidget, name='Tiff File', size=(2, 1), where=('right', puffDock))
+opsDock = win.addWidget(opsWidget, name='Analysis Options', size=(2, 1), where=('above', puffDock))
+imageDock = win.addWidget(imageWidget, name='Tiff File', size=(2, 1), where=('right', puffDock))
 
 win.show()
 app.exec_()
