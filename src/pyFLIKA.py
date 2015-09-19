@@ -504,7 +504,7 @@ def saveData():
 			data[num-freq]['Max Amp'] = maxAmp
 
 
-			export_dict_list(data, os.path.join(dirname, 'Puff Data.txt'), order=descs)
+			exportDictionaryList(data, os.path.join(dirname, 'Puff Data.txt'), order=descs)
 
 			# now save the group traces
 			data=np.zeros((np.size(K["Ratioed"],0), len(puffGroups)))
