@@ -534,11 +534,15 @@ analyzeMenu.addAction(beginAction)
 exportMenu = win.menuBar().addMenu('&Export')
 exportMenu.addAction(QAction('&Save Data', exportMenu, triggered=saveData))
 beginAction.setEnabled(False)
-traceDock = win.addWidget(traceWidget, name="Full Trace", size=(5, 4))
-puffDock = win.addWidget(puffTraceWidget, name='Puff Trace', size=(3, 1), where=('bottom', traceDock))
+traceWidget.__name__ = "Full Trace"
+puffTraceWidget.__name__ = "Puff Trace"
+opsWidget.__name__ = "Analysis Options"
+imageWidget.__name__ = "Video"
+traceDock = win.addWidget(traceWidget, size=(5, 4))
+puffDock = win.addWidget(puffTraceWidget, size=(3, 1), where=('bottom', traceDock))
 make_opts()
-opsDock = win.addWidget(opsWidget, name='Analysis Options', size=(2, 1), where=('above', puffDock))
-imageDock = win.addWidget(imageWidget, name='Tiff File', size=(2, 1), where=('right', puffDock))
+opsDock = win.addWidget(opsWidget, size=(2, 1), where=('above', puffDock))
+imageDock = win.addWidget(imageWidget, size=(2, 1), where=('right', puffDock))
 
 win.show()
 app.exec_()
