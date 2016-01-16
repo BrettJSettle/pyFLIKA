@@ -36,5 +36,5 @@ ABOUT
 -----
 *	Program: pyFLIKA
 *	Author: Brett Settle
-*	Date: August 13, 2016
+*	Date: August 13, 2015
 *	Lab: UCI Parker Lab, McGaugh Hall
