@@ -1,5 +1,4 @@
-# NOTE
-This program is no longer developed and has been superceeded by the more general image processing program Flika (https://github.com/flika-org/flika) and its detect puff plugin (https://github.com/kyleellefsen/detect_puffs).
+## NOTE!! This program is no longer developed and has been superceeded by the more general image processing program Flika (https://github.com/flika-org/flika) and its detect puff plugin (https://github.com/kyleellefsen/detect_puffs).
 
 # pyFLIKA
 An algorithm for automated detection, localization and measurement of local calcium signals from camera-based imaging
